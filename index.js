@@ -7,8 +7,32 @@ const port = 3004
 
 app.use(express.static(__dirname));
 
+app.use(bodyParser.urlencoded({ extended: false }));
 
 
+const USERS = []
+
+app.get('/login', (req, res) => {
+    const loginPath = (path.join(__dirname, 'login.html'))
+    res.sendFile(loginPath)
+})
+app.post('/login', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    if (email && password) {
+        const user = USERS.find(e => e.email === email && e.password === password)
+
+        if (user) {
+            res.sendFile(path.join(__dirname, 'welcome.html'))
+        } else {
+            res.status(401).send('user not registered! Please signup')
+        }
+    } else {
+        res.status(400).send('invalid email and password')
+
+    }
+})
 app.get('/signup', (req, res) => {
     const signupPath = path.join(__dirname, 'signup.html')
 
@@ -23,8 +47,21 @@ app.get('/signup', (req, res) => {
     })
 });
 
-app.post('/signup', (req,res) => {
-    
+app.post('/signup', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    if (email && password) {
+        const user = {
+            email: email,
+            password: password
+        }
+        USERS.push(user)
+        console.log(`heyy this is your email: ${email} , and password: ${password} `)
+        res.redirect('/login')
+    } else {
+        res.status(400).send('invalid email or pass')
+    }
 })
 
 app.get('/', (req, res) => {
